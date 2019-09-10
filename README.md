@@ -2,6 +2,8 @@
 
 Sistema de eventos encomendado pela Morena.
 
+[![Build Status](https://travis-ci.org/Leonardoperrella/eventexlinux.svg?branch=master)](https://travis-ci.org/Leonardoperrella/eventexlinux)
+
 ## Como desenvolver?
 1. Clone o repositório
 2. Crie um virtualenv
