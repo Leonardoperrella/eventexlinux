@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib import messages
 from django.core import mail
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render
 from django.template.loader import render_to_string
 
@@ -22,25 +22,32 @@ def create(request):
     if not form.is_valid():
         return render(request, 'subscriptions/subscription_form.html', {'form': form})
 
-    #Send Email
+    subscription = Subscription.objects.create(**form.cleaned_data)
 
+    #Send Email
     _send_mail('subscriptions/subscription_email.txt',
-               form.cleaned_data,
+               {'subscription': subscription}, #substitui form.cleane_data por dicionario de contexto {'subscription': subscription}
                'Confirmação de inscrição',
                settings.DEFAULT_FROM_EMAIL,
-               form.cleaned_data['email']
+               subscription.email
                )
 
-    Subscription.objects.create(**form.cleaned_data)
-    #Success Fedback
-    messages.success(request, 'Inscrição realizada com sucesso!')
-
-    return HttpResponseRedirect('/inscricao/')
+    return HttpResponseRedirect('/inscricao/{}/'.format(subscription.pk))
 
 
 def new(request):
     return render(request, 'subscriptions/subscription_form.html',
                   {'form': SubscriptionForm()}) #quando é classe, passo com parenteses  SubscriptionForm para ser uma instancia
+
+
+def detail(request, pk):
+    try:
+        subscription = Subscription.objects.get(pk=pk)
+    except Subscription.DoesNotExist:
+        raise Http404
+
+    return render(request, 'subscriptions/subscription_detail.html',
+                  {'subscription': subscription})
 
 
 def _send_mail(template_name, context, subject, from_, to):
