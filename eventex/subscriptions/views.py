@@ -1,7 +1,8 @@
+import re
+
 from django.conf import settings
-from django.contrib import messages
 from django.core import mail
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render
 from django.template.loader import render_to_string
 
@@ -32,7 +33,7 @@ def create(request):
                subscription.email
                )
 
-    return HttpResponseRedirect('/inscricao/{}/'.format(subscription.pk))
+    return HttpResponseRedirect('/inscricao/{}/'.format(subscription.hashid))
 
 
 def new(request):
@@ -40,9 +41,11 @@ def new(request):
                   {'form': SubscriptionForm()}) #quando é classe, passo com parenteses  SubscriptionForm para ser uma instancia
 
 
-def detail(request, pk):
+def detail(request, hashid):
+    if not re.match(r'\w{8}-\w{4}-\w{4}-\w{4}-\w{12}', hashid):
+        raise Http404
     try:
-        subscription = Subscription.objects.get(pk=pk)
+        subscription = Subscription.objects.get(hashid=hashid)
     except Subscription.DoesNotExist:
         raise Http404
 
