@@ -2,19 +2,25 @@ import re
 
 from django.conf import settings
 from django.core import mail
+from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import render
+from django.shortcuts import render, resolve_url as r
 from django.template.loader import render_to_string
 
 from eventex.subscriptions.forms import SubscriptionForm
 from eventex.subscriptions.models import Subscription
 
 
-def subscribe(request):
+def new(request):
     if request.method == 'POST':
         return create(request)
-    else:
-        return new(request)
+
+    return empty_form(request)
+
+
+def empty_form(request):
+    return render(request, 'subscriptions/subscription_form.html',
+                  {'form': SubscriptionForm()}) #quando é classe, passo com parenteses  SubscriptionForm para ser uma instancia
 
 
 def create(request):
@@ -32,25 +38,17 @@ def create(request):
                settings.DEFAULT_FROM_EMAIL,
                subscription.email
                )
-
-    return HttpResponseRedirect('/inscricao/{}/'.format(subscription.hashid))
-
-
-def new(request):
-    return render(request, 'subscriptions/subscription_form.html',
-                  {'form': SubscriptionForm()}) #quando é classe, passo com parenteses  SubscriptionForm para ser uma instancia
+    return HttpResponseRedirect(r('subscriptions:detail', subscription.hashid))
+    #return HttpResponseRedirect('/inscricao/{}/'.format(subscription.hashid))
 
 
 def detail(request, hashid):
-    if not re.match(r'\w{8}-\w{4}-\w{4}-\w{4}-\w{12}', hashid):
-        raise Http404
     try:
         subscription = Subscription.objects.get(hashid=hashid)
-    except Subscription.DoesNotExist:
-        raise Http404
+    except (Subscription.DoesNotExist, ValidationError):
+        raise Http404("Página não encontrada")
 
-    return render(request, 'subscriptions/subscription_detail.html',
-                  {'subscription': subscription})
+    return render(request, 'subscriptions/subscription_detail.html', {'subscription': subscription})
 
 
 def _send_mail(template_name, context, subject, from_, to):
