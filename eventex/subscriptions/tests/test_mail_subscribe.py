@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.core import mail
 from django.shortcuts import resolve_url as r
 
+
 class SubscribeEmailValid(TestCase):
     def setUp(self):
         data = dict(name='Henrique Bastos', cpf='12345678901',
