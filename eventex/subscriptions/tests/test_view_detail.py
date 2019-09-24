@@ -30,8 +30,8 @@ class SubscriptionDetailGet(TestCase):
                     self.obj.email,
                     self.obj.phone)
 
-        with self.subTest():
-            for expected in contents:
+        for expected in contents:
+            with self.subTest():
                 self.assertContains(self.resp, expected)
 
 
