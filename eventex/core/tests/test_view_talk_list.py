@@ -1,5 +1,5 @@
-from django.test import TestCase
 from django.shortcuts import resolve_url as r
+from django.test import TestCase
 
 from eventex.core.models import Talk, Speaker, Course
 
@@ -12,7 +12,7 @@ class TalkListGet(TestCase):
                             description='Descrição da palestra.')
 
         c1 = Course.objects.create(title='Título do Curso', start='09:00',
-                                 description='Descrição do curso.', slots=20)
+                                      description='Descrição do curso.', slots=20)
 
 
         speaker = Speaker.objects.create(name='Henrique Bastos',
@@ -49,7 +49,7 @@ class TalkListGet(TestCase):
                 self.assertContains(self.resp, expected, count)
 
     def test_context(self):
-        variables = ['morning_talks', 'afternoon_talks', 'courses']
+        variables = ['morning_talks', 'afternoon_talks']
 
         for key in variables:
             with self.subTest():
